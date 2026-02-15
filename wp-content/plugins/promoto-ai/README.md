@@ -1,0 +1,101 @@
+# Promoto AI
+
+Requires at least: 5.6
+Tested up to: 6.8
+Stable tag: 1.0.0
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+A WordPress extension that connects your WordPress site to Promoto AI to verify your site and enable secure, automated SEO workflows.
+
+## Features
+
+- **One‑click verification**: Verify your site with Promoto AI from the WP admin
+- **Secure encryption**: AES‑256‑CBC encryption for the onboarding payload
+- **Automatic domain detection**: Builds a full domain URL (scheme, host, optional port)
+- **Application Passwords**: Generates a secure WordPress Application Password (WP 5.6+)
+- **Plugin compatibility**: Auto‑configures RankMath and Wordfence where present
+- **Clean admin UI**: Simple, focused verification screen
+
+## Installation
+
+1. Upload the `promoto-ai` folder to `/wp-content/plugins/` (or install the ZIP)
+2. Activate the plugin from the WordPress Plugins screen
+3. In the admin menu, open **Promoto AI**
+
+## Usage
+
+1. Go to **Promoto AI** in your WordPress admin
+2. Click **Verify with Promoto AI**
+3. The plugin will:
+   - Detect your site domain automatically
+   - Generate a WordPress Application Password for your user
+   - Encrypt the payload using AES‑256‑CBC
+   - Call the Promoto AI backend verification endpoint and display the result
+
+## Plugin Compatibility
+
+### RankMath
+When RankMath is active, the plugin enables Headless CMS Support by turning on the `headless_support` option (and attempts to set it via RankMath’s API when available).
+
+### Wordfence
+When Wordfence is active, the plugin adds the RankMath endpoint `/wp-json/rankmath/v1/updateMeta` to the firewall allowlist using Wordfence’s WAF API when possible, and records the last check result.
+
+## Technical Details
+
+### Payload Structure
+The plugin creates and encrypts a payload similar to:
+```php
+$payload = [
+    'domain'     => 'https://your-domain.com',
+    'username'   => 'your_wp_username',
+    'apppassword'=> 'generated_secure_password',
+];
+```
+
+### Verification Endpoint
+- Default: `https://promotoai.com/api/auth/verify-plugin`
+- You can change this endpoint in `seo-pilot.php` if your Promoto AI backend runs elsewhere.
+
+### Encryption
+- **Algorithm**: AES‑256‑CBC
+- **IV**: Random per request, prepended to the ciphertext before encoding
+- **Encoding**: Base64 with URL‑safe characters
+
+### Stored Data (WordPress options)
+- `seo_pilot_credentials`: username, app_password, email, domain
+- `seo_pilot_app_passwords`: application password metadata (UUID, created, etc.)
+- `seo_pilot_activated`, `seo_pilot_activation_time`
+- `seo_pilot_wordfence_last_check` (timestamp, success flag, endpoint)
+
+## Security
+
+- Nonces for all AJAX actions
+- Input sanitization
+- Encrypted transmission of sensitive values
+- Adheres to WordPress coding standards
+
+## Requirements
+
+- WordPress 5.6 or higher (Application Passwords)
+- PHP 7.4 or higher
+- OpenSSL PHP extension enabled
+
+## Uninstall
+
+Removing the plugin via WordPress deletes these options:
+- `seo_pilot_credentials`
+- `seo_pilot_app_passwords`
+- `seo_pilot_activated`
+- `seo_pilot_activation_time`
+- `seo_pilot_debug_logs`
+
+Note: The Wordfence last‑check record (`seo_pilot_wordfence_last_check`) is not removed by uninstall.
+
+## Support
+
+For support or questions, please contact the Promoto AI support team.
+
+---
+
+Note: The plugin slug should not contain the word "plugin". If your folder is currently named `promoto-ai-plugin`, please rename it to `promoto-ai` to satisfy WordPress.org guidelines.
